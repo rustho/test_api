@@ -1,0 +1,1226 @@
+openapi: 3.0.0
+paths:
+  /healthcheck:
+    get:
+      operationId: HealthController_check
+      parameters:
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Health Check is successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  info:
+                    type: object
+                    example: &ref_0
+                      database: &ref_1
+                        status: up
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  error:
+                    type: object
+                    example: {}
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  details:
+                    type: object
+                    example: *ref_0
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+        '503':
+          description: The Health Check is not successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  info:
+                    type: object
+                    example: *ref_0
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  error:
+                    type: object
+                    example:
+                      redis: &ref_2
+                        status: down
+                        message: Could not connect
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  details:
+                    type: object
+                    example:
+                      database: *ref_1
+                      redis: *ref_2
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+      tags: &ref_3
+        - HealthCheck
+  /healthcheck/metrics:
+    get:
+      operationId: HealthController_metrics
+      parameters:
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: ''
+      tags: *ref_3
+  /api/v1/cpt/{id}:
+    get:
+      operationId: CptController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: '00000'
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get CPT By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/CptDto'
+        '404':
+          description: The Search CPT By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Cpt with specified 'id' not found
+      tags: &ref_4
+        - CPT
+  /api/v1/cpt/search:
+    get:
+      operationId: CptController_search
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: Agriflu vaccine
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 25
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            default: 1
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search CPT successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CptDto'
+      tags: *ref_4
+  /api/v1/internal/cpt/import:
+    post:
+      operationId: InternalCptController_import
+      parameters:
+        - name: url
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags:
+        - Internal CPT
+  /api/v1/icd/{id}:
+    get:
+      operationId: IcdController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: A00.0
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get ICD By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/IcdDto'
+        '404':
+          description: The Search ICD By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Icd with specified 'id' not found
+      tags: &ref_5
+        - ICD
+  /api/v1/icd/search:
+    get:
+      operationId: IcdController_search
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: Typhoid
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search ICD successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IcdDto'
+      tags: *ref_5
+  /api/v1/internal/icd/import:
+    post:
+      operationId: InternalIcdController_import
+      parameters:
+        - name: url
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags:
+        - Internal ICD
+  /api/v1/loinc/{id}:
+    get:
+      operationId: LoincController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: 10002-4
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get Loinc By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/LoincDto'
+        '404':
+          description: The Search Loinc By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Loinc with specified 'id' not found
+      tags: &ref_6
+        - LOINC
+  /api/v1/loinc/search:
+    get:
+      operationId: LoincController_search
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: wave
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 25
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            default: 1
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search Loinc successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LoincDto'
+      tags: *ref_6
+  /api/v1/internal/loinc/import:
+    post:
+      operationId: InternalLoincController_import
+      parameters:
+        - name: url
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags:
+        - Internal LOINC
+  /api/v1/npi/individual/{id}:
+    get:
+      operationId: NpiController_getIndividualById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: '0000000000'
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get NPI Individual By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/NpiIndividualDto'
+        '400':
+          description: The Search NPI Individual By Id Bad Request Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Bad Request
+                  message:
+                    type: string
+                    default: NPI 'id' must be equal to 10 characters
+        '404':
+          description: The Search NPI Individual By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Individual NPI with specified 'id' not found
+        '500':
+          description: The Search NPI Individual By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: &ref_7
+        - NPI
+  /api/v1/npi/laboratory/{id}:
+    get:
+      operationId: NpiController_getLaboratoryById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: '0000000000'
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get NPI Laboratory By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/NpiOrganizationDto'
+        '400':
+          description: The Search NPI Laboratory By Id Bad Request Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Bad Request
+                  message:
+                    type: string
+                    default: NPI 'id' must be equal to 10 characters
+        '404':
+          description: The Search NPI Laboratory By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Laboratory NPI with specified 'id' not found
+        '500':
+          description: The Search NPI Laboratory By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: *ref_7
+  /api/v1/npi/practice/{id}:
+    get:
+      operationId: NpiController_getPracticeById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: '0000000000'
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get NPI Practice By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/NpiOrganizationDto'
+        '400':
+          description: The Search NPI Practice By Id Bad Request Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Bad Request
+                  message:
+                    type: string
+                    default: NPI 'id' must be equal to 10 characters
+        '404':
+          description: The Search NPI Practice By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Practice NPI with specified 'id' not found
+        '500':
+          description: The Search NPI Practice By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: *ref_7
+  /api/v1/npi/individual/search:
+    get:
+      operationId: NpiController_searchIndividual
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: JOHN
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 25
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            default: 1
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search NPI Individual successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NpiIndividualDto'
+        '500':
+          description: The Search NPI Individual By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: *ref_7
+  /api/v1/npi/laboratory/search:
+    get:
+      operationId: NpiController_searchLaboratory
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: JOHN
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 25
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            default: 1
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search NPI Laboratory successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NpiOrganizationDto'
+        '500':
+          description: The Search NPI Laboratory By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: *ref_7
+  /api/v1/npi/practice/search:
+    get:
+      operationId: NpiController_searchPractice
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: JOHN
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 25
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            default: 1
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search NPI Practice successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NpiOrganizationDto'
+        '500':
+          description: The Search NPI Practice By Id Internal Server Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Internal Server Error
+                  message:
+                    type: string
+                    default: Something went wrong
+      tags: *ref_7
+  /api/v1/internal/npi/import/init:
+    post:
+      operationId: InternalNpiController_import
+      parameters:
+        - name: url
+          required: true
+          in: query
+          example: >-
+            https://download.cms.gov/nppes/NPPES_Data_Dissemination_051523_052123_Weekly.zip
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import Init successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags: &ref_8
+        - Internal NPI
+  /api/v1/internal/npi/import/update:
+    post:
+      operationId: InternalNpiController_importUpdate
+      parameters:
+        - name: url
+          required: true
+          in: query
+          example: >-
+            https://download.cms.gov/nppes/NPPES_Data_Dissemination_051523_052123_Weekly.zip
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import Update successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags: *ref_8
+  /api/v1/ndc/{id}:
+    get:
+      operationId: NdcController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: 66843-011_d673243f-9f5e-1111-e053-2a95a90a8a24
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Get NDC By Id successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    $ref: '#/components/schemas/NdcDto'
+        '404':
+          description: The Search NDC By Id Not Found Exception
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    default: Not Found
+                  message:
+                    type: string
+                    default: Ndc with specified 'id' not found
+      tags: &ref_9
+        - NDC
+  /api/v1/ndc/search:
+    get:
+      operationId: NdcController_search
+      parameters:
+        - name: text
+          required: true
+          in: query
+          example: HUMAN
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Search NDC successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NdcDto'
+      tags: *ref_9
+  /api/v1/internal/ndc/import:
+    post:
+      operationId: InternalNdcController_import
+      parameters:
+        - name: url
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: REQUEST_SOURCE
+          example: PatientPortal
+          in: header
+          required: true
+          schema: {}
+        - name: REQUEST_TOPIC
+          example: TestResultNotification
+          in: header
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: The Import successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        default: done
+      tags:
+        - Internal NDC
+info:
+  title: Terminology
+  description: Terminology API
+  version: '1.0'
+  contact: {}
+tags:
+  - name: pet
+    description: Everything about your Pets
+servers:
+  - url: 'http://petstore.swagger.io/v2'
+components:
+  schemas:
+    CptDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '00000'
+        name:
+          type: string
+          example: name
+      required:
+        - id
+        - name
+    IcdDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: A00.0
+        name:
+          type: string
+          example: name
+      required:
+        - id
+        - name
+    LoincDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 10002-4
+        name:
+          type: string
+          example: R wave duration in lead II
+        short_name:
+          type: string
+          example: R wave dur L-II
+        is_active:
+          type: boolean
+      required:
+        - id
+        - name
+        - is_active
+    NpiIndividualDto:
+      type: object
+      properties:
+        id:
+          type: string
+          default: '0000000000'
+        first_name:
+          type: string
+          default: JOHN
+        last_name:
+          type: string
+          default: DOE
+        country:
+          type: string
+          default: US
+        state:
+          type: string
+          default: LA
+        postal_code:
+          type: string
+          default: '00000'
+        city:
+          type: string
+          default: City
+        street_line1:
+          type: string
+          default: Line 6300
+        street_line2:
+          type: string
+          default: ''
+        phone:
+          type: string
+          default: '0000000000'
+        credential:
+          default:
+            - M.D.
+          type: array
+          items:
+            type: string
+        converted_credential:
+          default:
+            - MD
+          type: array
+          items:
+            type: string
+        is_deactivated:
+          type: boolean
+          default: false
+      required:
+        - id
+    NpiOrganizationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          default: '0000000000'
+        business_name:
+          type: string
+          default: Company LLC
+        country:
+          type: string
+          default: US
+        state:
+          type: string
+          default: LA
+        postal_code:
+          type: string
+          default: '00000'
+        city:
+          type: string
+          default: City
+        street_line1:
+          type: string
+          default: Line 6300
+        street_line2:
+          type: string
+          default: Line 1111
+        phone:
+          type: string
+          default: '0000000000'
+        taxonomy:
+          type: string
+          default: 101Y00000X
+        is_deactivated:
+          type: boolean
+          default: true
+      required:
+        - id
+    NdcDto:
+      type: object
+      properties:
+        id:
+          type: string
+          default: 66843-011_d673243f-9f5e-1111-e053-2a95a90a8a24
+        product_ndc:
+          type: string
+          default: 66843-011
+        product_type:
+          type: string
+          default: HUMAN OTC DRUG
+        generic_name:
+          type: string
+          default: Salicylic Acid
+        labeler_name:
+          type: string
+          default: Scapa Tapes North America LLC
+        brand_name:
+          type: string
+          default: Scholls Wellness Company LLC
+        brand_name_suffix:
+          type: string
+          default: Clear Away Wart Removers
+        listing_expiration_date:
+          format: date-time
+          type: string
+        marketing_category:
+          type: string
+          default: OTC MONOGRAPH FINAL
+        dosage_form:
+          type: string
+          default: LIQUID
+        marketing_start_date:
+          format: date-time
+          type: string
+        marketing_end_date:
+          format: date-time
+          type: string
+          default: null
+        application_number:
+          type: string
+          default: part358F
+        pharm_class:
+          default: []
+          type: array
+          items:
+            type: string
+        route:
+          default:
+            - TOPICAL
+          type: array
+          items:
+            type: string
+        active_ingredients:
+          type: object
+          default:
+            - name: ISOPROPYL ALCOHOL
+              strengh: 75 mL/100mL
+      required:
+        - id
+        - product_ndc
+        - pharm_class
+        - route
